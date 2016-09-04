@@ -12,7 +12,7 @@ module.exports = {
       description: Pack.description,
       version: Pack.version
     },
-    enableDocumentation: true,
+    documentationPage: true,
     documentationPath: '/swagger_ui',
     jsonEditor: true,
     basePath: '/',

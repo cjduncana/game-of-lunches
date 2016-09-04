@@ -63,6 +63,7 @@ routes.push({
       }
     },
     tags: ['api'],
+    // TODO: When any().forbidden() is fixed, change this portion.
     validate: {
       payload: SCHEMAS.Poll
     }
