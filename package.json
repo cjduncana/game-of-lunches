@@ -1,0 +1,47 @@
+{
+  "name": "game-of-lunches",
+  "version": "0.1.0",
+  "description": "Allow members of the ADMIOS team to vote for their preferred restaurants",
+  "main": "index.js",
+  "scripts": {
+    "docker:kill": "npm run docker:stop && npm run docker:rm",
+    "docker:rm": "docker-compose -f docker-compose.yml rm",
+    "docker:start": "docker-compose -f docker-compose.yml up -d",
+    "docker:stop": "docker-compose -f docker-compose.yml kill",
+    "migrate:down": "scripts/migrate --down | node_modules/.bin/bunyan",
+    "migrate:up": "scripts/migrate --up | node_modules/.bin/bunyan",
+    "db:migrate:down": "scripts/migrate --down | node_modules/.bin/bunyan",
+    "start": "node index.js | node_modules/.bin/bunyan"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cjduncana/game-of-lunches.git"
+  },
+  "keywords": [
+    "voting",
+    "restaurants"
+  ],
+  "author": "Christopher Duncan <cj.duncan.a@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cjduncana/game-of-lunches/issues"
+  },
+  "homepage": "http://github.com/cjduncana/game-of-lunches#readme",
+  "dependencies": {
+    "bluebird": "^3.4.6",
+    "boom": "^3.2.1",
+    "bunyan": "^1.8.1",
+    "commander": "^2.9.0",
+    "fs": "0.0.1-security",
+    "hapi": "^13.5.3",
+    "hapi-swagger": "^4.2.1",
+    "inert": "^4.0.2",
+    "joi": "^9.0.4",
+    "lodash": "^4.15.0",
+    "mysql": "^2.11.1",
+    "path": "^0.12.7",
+    "sequelize": "^3.24.1",
+    "umzug": "^1.11.0",
+    "vision": "^4.1.0"
+  }
+}
