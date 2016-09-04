@@ -47,8 +47,10 @@ Errors.InternalServerError = boomError(500, 'Internal Server Error', 'An uknown 
 // Bad Request Errors
 Errors.BadRequestPollError = validationError(400, 'Bad Request', '"invalidKey" is not allowed', 'BadRequestPollError');
 Errors.BadRequestRestaurantError = validationError(400, 'Bad Request', '"invalidKey" is not allowed', 'BadRequestRestaurantError');
+Errors.BadRequestUserError = validationError(400, 'Bad Request', '"invalidKey" is not allowed', 'BadRequestUserError');
 
 // Conflict Errors
 Errors.ExistingRestaurantError = boomError(409, 'Conflict', 'Restaurant already exist', 'ExistingRestaurantError');
+Errors.ExistingUserError = boomError(409, 'Conflict', 'User already exist', 'ExistingUserError');
 
 module.exports = Errors;
