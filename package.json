@@ -4,6 +4,9 @@
   "description": "Allow members of the ADMIOS team to vote for their preferred restaurants",
   "main": "index.js",
   "scripts": {
+    "precoverage": "NODE_ENV=test scripts/create_test_database && NODE_ENV=test node scripts/migrate --up | node_modules/.bin/bunyan",
+    "coverage": "NODE_ENV=test ./node_modules/lab/bin/lab -C -l -L -M 30000 -r html -o ./coverage/index.html -r console -o stdout",
+    "coverage:open": "scripts/open_coverage",
     "docker:kill": "npm run docker:stop && npm run docker:rm",
     "docker:rm": "docker-compose -f docker-compose.yml rm",
     "docker:start": "docker-compose -f docker-compose.yml up -d",
@@ -49,6 +52,7 @@
   "devDependencies": {
     "code": "^3.0.2",
     "lab": "^11.0.1",
+    "open": "0.0.5",
     "sinon": "^1.17.5"
   }
 }
