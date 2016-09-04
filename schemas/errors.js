@@ -45,6 +45,7 @@ function validationError(statusCode, type, message, label) {
 Errors.InternalServerError = boomError(500, 'Internal Server Error', 'An uknown error has occured. Please try again later.', 'InternalServerError');
 
 // Bad Request Errors
+Errors.BadRequestPollError = validationError(400, 'Bad Request', '"invalidKey" is not allowed', 'BadRequestPollError');
 Errors.BadRequestRestaurantError = validationError(400, 'Bad Request', '"invalidKey" is not allowed', 'BadRequestRestaurantError');
 
 // Conflict Errors
