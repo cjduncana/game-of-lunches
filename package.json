@@ -32,6 +32,7 @@
     "boom": "^3.2.1",
     "bunyan": "^1.8.1",
     "commander": "^2.9.0",
+    "error-factory": "^0.1.6",
     "fs": "0.0.1-security",
     "hapi": "^13.5.3",
     "hapi-swagger": "^4.2.1",
