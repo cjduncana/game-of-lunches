@@ -27,6 +27,16 @@ module.exports = function(db) {
           }
           throw err;
         });
+      },
+
+      getUser: function(userId) {
+        return this.findById(userId)
+        .then((user) => {
+          if (!user) {
+            throw new Errors.UserNotFoundError();
+          }
+          return user;
+        });
       }
     },
     instanceMethods: {},

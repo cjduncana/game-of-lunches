@@ -4,6 +4,9 @@ require('../testHelpers');
 
 const Promise = require('bluebird');
 
+let Poll;
+let Restaurant;
+let User;
 let Vote;
 
 exports.lab = Lab.script();
@@ -12,13 +15,25 @@ const server = Server.server;
 
 describe('Vote resources', () => {
 
-  const sampleVote = {
+  const samplePoll = {
+    numberOfRestaurants: 3
+  };
+  const sampleRestaurant = {
     name: 'Subway'
+  };
+  const sampleUser = {
+    name: 'Adam Connover'
+  };
+  const sampleVote = {
+    rank: 1
   };
 
   before((done) => {
     Server.initialize()
     .then(() => {
+      Poll = server.models.Poll;
+      Restaurant = server.models.Restaurant;
+      User = server.models.User;
       Vote = server.models.Vote;
       return done();
     });
@@ -26,6 +41,9 @@ describe('Vote resources', () => {
 
   describe('GET /votes', () => {
 
+    let pollInstance;
+    let restaurantInstance;
+    let userInstance;
     let voteInstance;
 
     function callServer(test) {
@@ -36,7 +54,23 @@ describe('Vote resources', () => {
     }
 
     before((done) => {
-      Vote.create(sampleVote)
+      Promise.props({
+        poll: Poll.create(samplePoll),
+        restaurant: Restaurant.create(sampleRestaurant),
+        user: User.create(sampleUser)
+      })
+
+      .then(({ poll, restaurant, user }) => {
+        pollInstance = poll;
+        restaurantInstance = restaurant;
+        userInstance = user;
+        return Vote.create(Object.assign({}, sampleVote, {
+          choiceId: restaurantInstance.id,
+          pollId: pollInstance.id,
+          voterId: userInstance.id
+        }));
+      })
+
       .then((vote) => {
         voteInstance = vote;
         return done();
@@ -49,7 +83,12 @@ describe('Vote resources', () => {
     });
 
     after((done) => {
-      voteInstance.destroy()
+      Promise.all([
+        pollInstance.destroy(),
+        restaurantInstance.destroy(),
+        userInstance.destroy(),
+        voteInstance.destroy()
+      ])
       .then(() => done());
     });
 
@@ -58,7 +97,15 @@ describe('Vote resources', () => {
         expect(response.statusCode).to.equal(200);
         expect(response.result).to.equal([{
           id: voteInstance.id,
-          name: 'Subway'
+          rank: 1,
+          choice: {
+            id: restaurantInstance.id,
+            name: 'Subway'
+          },
+          voter: {
+            id: userInstance.id,
+            name: 'Adam Connover'
+          }
         }]);
         return done();
       });
@@ -80,9 +127,11 @@ describe('Vote resources', () => {
 
   describe('POST /votes', () => {
 
-    const validPayload = {
-      name: 'Subway'
-    };
+    let pollInstance;
+    let restaurantInstance;
+    let userInstance;
+
+    const validPayload = [];
 
     function callServer(payload, test) {
       return server.inject({
@@ -92,39 +141,84 @@ describe('Vote resources', () => {
       }, test);
     }
 
+    before((done) => {
+      Promise.props({
+        poll: Poll.create(samplePoll),
+        restaurant: Restaurant.create(sampleRestaurant),
+        user: User.create(sampleUser)
+      })
+
+      .then(({ poll, restaurant, user }) => {
+        pollInstance = poll;
+        restaurantInstance = restaurant;
+        userInstance = user;
+        validPayload.push(Object.assign({}, sampleVote, {
+          choice: {
+            id: restaurantInstance.id,
+            name: restaurantInstance.name
+          },
+          voter: {
+            id: userInstance.id,
+            name: userInstance.name
+          }
+        }));
+        return done();
+      });
+    });
+
     afterEach((done) => {
-      Vote.create.restore && Vote.create.restore();
+      Vote.createVote.restore && Vote.createVote.restore();
       return done();
+    });
+
+    after((done) => {
+      Promise.all([
+        pollInstance.destroy(),
+        restaurantInstance.destroy(),
+        userInstance.destroy()
+      ])
+      .then(() => done());
     });
 
     it('should return a new vote when this endpoint is used correctly', (done) => {
       return callServer(validPayload, (response) => {
         expect(response.statusCode).to.equal(201);
-        expect(response.result).to.equal({
-          id: response.result.id,
-          name: 'Subway'
-        });
-        return Vote.findById(response.result.id)
-        .then((vote) => vote.destroy())
+        expect(response.result).to.equal([{
+          id: response.result[0].id,
+          rank: 1,
+          choice: {
+            id: restaurantInstance.id,
+            name: 'Subway'
+          },
+          voter: {
+            id: userInstance.id,
+            name: 'Adam Connover'
+          }
+        }]);
+
+        return Promise.map(response.result, (vote) => {
+          return Vote.findById(vote.id);
+        })
+        .then((votes) => Promise.map(votes, (vote) => {
+          return vote.destroy();
+        }))
         .then(() => done());
       });
     });
 
     describe('bad request', () => {
 
-      it('should return a 400 if an invalid key is in the payload', (done) => {
-        const invalidPayload = Object.assign({}, validPayload, {
-          invalidKey: 'some value'
-        });
+      it('should return a 400 if the payload is not an array', (done) => {
+        const invalidPayload = {};
 
         return callServer(invalidPayload, (response) => {
           expect(response.statusCode).to.equal(400);
           expect(response.result).to.equal({
             error: 'Bad Request',
-            message: '"invalidKey" is not allowed',
+            message: '"Votes" must be an array',
             statusCode: 400,
             validation: {
-              keys: ['invalidKey'],
+              keys: ['Votes'],
               source: 'payload'
             }
           });
@@ -133,27 +227,8 @@ describe('Vote resources', () => {
       });
     });
 
-    it('should return a 409 if a vote already exists with the same name', (done) => {
-      let voteInstance;
-
-      Vote.create(sampleVote)
-      .then((vote) => {
-        voteInstance = vote;
-        return callServer(validPayload, (response) => {
-          expect(response.statusCode).to.equal(409);
-          expect(response.result).to.equal({
-            error: 'Conflict',
-            message: 'Vote already exist',
-            statusCode: 409
-          });
-          return voteInstance.destroy();
-        });
-      })
-      .then(() => done());
-    });
-
     it('should return a 500 if an unknown/unhandled error happens', (done) => {
-      sinon.stub(Vote, 'create').returns(Promise.reject('POST /votes stubbed error'));
+      sinon.stub(Vote, 'createVote').returns(Promise.reject('POST /votes stubbed error'));
       return callServer(validPayload, (response) => {
         expect(response.statusCode).to.equal(500);
         expect(response.result).to.equal({

@@ -1,6 +1,7 @@
 'use strict';
 
 const Boom = require('boom');
+const Promise = require('bluebird');
 
 const Errors = require('../lib/errors');
 const Formatters = require('../lib/formatters');
@@ -13,15 +14,50 @@ exports.listVotes = function(request, reply) {
   .catch(this.helpers.errorHandler.bind(this, reply));
 };
 
-exports.createVote = function({ payload }, reply) {
-  delete payload.id;
+exports.createVotes = function({ payload }, reply) {
+  payload.forEach((vote) => {
+    delete vote.id;
+  });
 
-  return this.models.Vote.createVote(payload)
-  .then((vote) => {
-    return reply(Formatters.vote(vote)).code(201);
+  return Promise.map(payload, ({ rank, choice, voter }) => {
+    return Promise.props({
+      rank,
+      choice: this.models.Restaurant.getRestaurant(choice.id),
+      voter: this.models.User.getUser(voter.id)
+    });
   })
-  .catch(Errors.ExistingVoteError, () => {
-    return reply(Boom.conflict('Vote already exist'));
+
+  .then((votes) => Promise.props({
+    poll: this.models.Poll.getActivePoll(),
+    votes
+  }))
+
+  .then(({ poll, votes }) => Promise.map(votes, ({ rank, choice, voter }) => {
+    return this.models.Vote.createVote({
+      rank,
+      choiceId: choice.id,
+      pollId: poll.id,
+      voterId: voter.id
+    });
+  }))
+
+  .then((votes) => {
+    // console.log(votes);
+    return reply(Formatters.votes(votes)).code(201);
   })
+
+  .catch(Errors.PollNotFoundError, () => {
+    return reply(Boom.badRequest('An active poll was not found'));
+  })
+  .catch(Errors.RestaurantNotFoundError, () => {
+    return reply(Boom.badRequest('A restaurant in the list was not found'));
+  })
+  .catch(Errors.UserNotFoundError, () => {
+    return reply(Boom.badRequest('A user in the list was not found'));
+  })
+  // .catch((err) => {
+  //   console.log(err);
+  //   throw err;
+  // })
   .catch(this.helpers.errorHandler.bind(this, reply));
 };

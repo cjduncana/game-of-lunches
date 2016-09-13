@@ -17,7 +17,7 @@ routes.push({
   config: {
     handler: Votes.listVotes,
     description: 'List all votes',
-    notes: 'List all votes within the system',
+    notes: 'List all votes within the active poll',
     plugins: {
       'hapi-swagger': {
         responses: {
@@ -41,23 +41,19 @@ routes.push({
   method: 'POST',
   path: API_BASE_PATH,
   config: {
-    handler: Votes.createVote,
-    description: 'Create a vote',
-    notes: 'Creates a new vote',
+    handler: Votes.createVotes,
+    description: 'Create votes',
+    notes: 'Creates several new votes',
     plugins: {
       'hapi-swagger': {
         responses: {
           '201': {
             description: 'Success',
-            schema: SCHEMAS.Vote
+            schema: Joi.array().items(SCHEMAS.Vote).label('Votes')
           },
           '400': {
             description: 'Bad Request',
             schema: SCHEMAS.Errors.BadRequestVoteError
-          },
-          '409': {
-            description: 'Duplicate Vote',
-            schema: SCHEMAS.Errors.ExistingVoteError
           },
           '500': {
             description: 'Internal Server Error',
@@ -69,7 +65,7 @@ routes.push({
     tags: ['api'],
     // TODO: When any().forbidden() is fixed, change this portion.
     validate: {
-      payload: SCHEMAS.Vote
+      payload: Joi.array().items(SCHEMAS.Vote).label('Votes')
     }
   }
 });

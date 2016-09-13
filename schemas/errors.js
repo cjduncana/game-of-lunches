@@ -48,6 +48,7 @@ Errors.InternalServerError = boomError(500, 'Internal Server Error', 'An uknown 
 Errors.BadRequestPollError = validationError(400, 'Bad Request', '"invalidKey" is not allowed', 'BadRequestPollError');
 Errors.BadRequestRestaurantError = validationError(400, 'Bad Request', '"invalidKey" is not allowed', 'BadRequestRestaurantError');
 Errors.BadRequestUserError = validationError(400, 'Bad Request', '"invalidKey" is not allowed', 'BadRequestUserError');
+Errors.BadRequestVoteError = validationError(400, 'Bad Request', '"invalidKey" is not allowed', 'BadRequestVoteError');
 
 // Conflict Errors
 Errors.ExistingRestaurantError = boomError(409, 'Conflict', 'Restaurant already exist', 'ExistingRestaurantError');

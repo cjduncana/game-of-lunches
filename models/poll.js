@@ -2,6 +2,8 @@
 
 const Sequelize = require('sequelize');
 
+const Errors = require('../lib/errors');
+
 module.exports = function(db) {
   const Poll = db.define('Poll', {
     id: {
@@ -26,6 +28,18 @@ module.exports = function(db) {
         })
         // Then create a new poll
         .then(() => this.create(pollData));
+      },
+
+      getActivePoll: function() {
+        return this.findOne({
+          where: { active: true }
+        })
+        .then((poll) => {
+          if (!poll) {
+            throw new Errors.PollNotFoundError();
+          }
+          return poll;
+        });
       }
     },
     instanceMethods: {},

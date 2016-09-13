@@ -27,6 +27,16 @@ module.exports = function(db) {
           }
           throw err;
         });
+      },
+
+      getRestaurant: function(restaurantId) {
+        return this.findById(restaurantId)
+        .then((restaurant) => {
+          if (!restaurant) {
+            throw new Errors.RestaurantNotFoundError();
+          }
+          return restaurant;
+        });
       }
     },
     instanceMethods: {},
