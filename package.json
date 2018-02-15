@@ -33,21 +33,21 @@
   "homepage": "http://github.com/cjduncana/game-of-lunches#readme",
   "dependencies": {
     "bluebird": "^3.4.6",
-    "boom": "^4.0.0",
+    "boom": "^6.0.0",
     "bunyan": "^1.8.1",
     "commander": "^2.9.0",
     "error-factory": "^0.1.6",
     "fs": "0.0.1-security",
-    "hapi": "^15.0.3",
-    "hapi-swagger": "^7.2.0",
-    "inert": "^4.0.2",
-    "joi": "^9.0.4",
+    "hapi": "^17.0.0",
+    "hapi-swagger": "^8.0.0",
+    "inert": "^5.0.0",
+    "joi": "^13.0.0",
     "lodash": "^4.15.0",
     "mysql": "^2.11.1",
     "path": "^0.12.7",
-    "sequelize": "^3.24.1",
+    "sequelize": "^4.0.0",
     "umzug": "^1.11.0",
-    "vision": "^4.1.0"
+    "vision": "^5.0.0"
   },
   "devDependencies": {
     "code": "^3.0.2",
